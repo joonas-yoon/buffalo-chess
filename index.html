@@ -141,17 +141,15 @@
     <div class="game wild">
       <div class="markers">
         <div class="tile row-1 col-1 buff"></div>
-        <div class="tile row-3 col-2 buff"></div>
-        <div class="tile row-3 col-3 buff"></div>
-        <div class="tile row-3 col-4 buff"></div>
-        <div class="tile row-3 col-5 buff"></div>
-        <div class="tile row-2 col-6 buff"></div>
+        <div class="tile row-1 col-2 buff"></div>
+        <div class="tile row-1 col-3 buff"></div>
+        <div class="tile row-1 col-4 buff"></div>
+        <div class="tile row-1 col-5 buff"></div>
+        <div class="tile row-1 col-6 buff"></div>
         <div class="tile row-1 col-7 buff"></div>
-        <div class="tile row-6 col-2 dog"></div>
         <div class="tile row-6 col-3 dog"></div>
         <div class="tile row-6 col-4 player"></div>
         <div class="tile row-6 col-5 dog"></div>
-        <div class="tile row-6 col-6 dog"></div>
       </div>
       <div class="guide">
         <div class="tile row-1 col-1"></div>
@@ -305,6 +303,37 @@
       });
     }
 
+    // turns for computer
+    function moveBuffalo() {
+      let buffs = document.querySelectorAll('.tile.buff');
+      let cands = [];
+      for(let i=0; i < buffs.length; ++i) {
+        let pos = getPos(buffs[i]);
+        if (pos.row == 7) continue; // already arrived
+        let rc = '.row-' + (pos.row + 1) + '.col-' + pos.col;
+        if (markers.querySelector(rc)) continue; // something at front
+        cands.push([buffs[i], pos]);
+      }
+      if (cands.length) {
+        var b = cands[Math.floor(Math.random() * cands.length)];
+        moveTo(b[0], b[1].row + 1, b[1].col);
+        if (b[1].row + 1 == 7) {
+          setTimeout(function(){ alert('You Lose'); }, 300);
+        }
+      } else {
+        alert('You win!');
+      }
+    }
+
+    function selectDogSubmit(evt) {
+      evt.target.removeEventListener('click', selectDogSubmit);
+      evt.target.removeEventListener('click', selectPlayerSubmit);
+      var pos = getPos(evt.target);
+      moveTo(selection, pos.row, pos.col);
+      removeAllGuides();
+      setTimeout(moveBuffalo, 100);
+    }
+
     function selectDog(evt) {
       removeAllGuides();
       guide.classList.add('dog');
@@ -318,12 +347,22 @@
           var marker = markers.querySelector(rc);
           if (isDog(marker) || isPlayer(marker) || isBuffalo(marker)) break;
           guide.querySelector(rc).classList.add('active');
-          guide.querySelector(rc).addEventListener('click', function(evt2){
-            moveTo(selection, r, c);
-            removeAllGuides();
-          }, { once: true });
+          guide.querySelector(rc).addEventListener('click', selectDogSubmit);
         }
       }
+    }
+
+    function selectPlayerSubmit(evt) {
+      evt.target.removeEventListener('click', selectDogSubmit);
+      evt.target.removeEventListener('click', selectPlayerSubmit);
+      let pos = getPos(evt.target);
+      let marker = markers.querySelector('.row-' + pos.row + '.col-' + pos.col);
+      if (isBuffalo(marker)) {
+        marker.remove();
+      }
+      moveTo(selection, pos.row, pos.col);
+      removeAllGuides();
+      setTimeout(moveBuffalo, 100);
     }
 
     function selectPlayer(evt) {
@@ -335,18 +374,11 @@
       var p = getPos(this), player = this;
       for(var d=0; d<8; ++d){
         for(let r = p.row + dy[d], c = p.col + dx[d], t = 0; isMovableRange(r, c) && t++ < 1; r += dy[d], c += dx[d]){
-          var rc = '.row-' + r + '.col-' + c;
-          var marker = markers.querySelector(rc);
+          let rc = '.row-' + r + '.col-' + c;
+          let marker = markers.querySelector(rc);
           if (isDog(marker) || isPlayer(marker)) break;
           guide.querySelector(rc).classList.add('active');
-          guide.querySelector(rc).addEventListener('click', function(evt2){
-            var pos = getPos(evt2.target);
-            moveTo(selection, pos.row, pos.col);
-            if (isBuffalo(markers.querySelector('.row-' + pos.row + '.col-' + pos.col))) {
-              markers.querySelector('.row-' + pos.row + '.col-' + pos.col).remove();
-            }
-            removeAllGuides();
-          }, { once: true });
+          guide.querySelector(rc).addEventListener('click', selectPlayerSubmit);
           if (isBuffalo(marker)) break;
         }
       }
