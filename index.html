@@ -4,6 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title></title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Langar&display=swap');
     body {
       background-color: #ffe0a5;
     }
@@ -17,93 +18,114 @@
       width: 500px;
       margin: 0 auto;
     }
-    .game.wild .tile {
-      background: #f1c87b;
+    .game.wild .grid .tile {
+      background-color: #f5d394;
       border-color: #ffe0a5;
     }
     .grid, .hud {
       width: 500px;
       height: 500px;
       position: absolute;
-      background: #bfa980;
       border-radius: 10px;
     }
-    .hud .tile {
-      display: none;
+    .grid {
+      background-color: rgba(0,0,0,.15);
+    }
+    .hud {
       z-index: 3;
-      opacity: 0.5;
     }
     .tile {
       position: absolute;
-      border: 1px solid #ddd;
+      border: 0;
+      border-radius: 5px;
       color: rgba(255,255,255,.5);
-      background: #fff;
-      width: 68.57142857142857px;
-      height: 68.57142857142857px;
+      background-color: #fff;
+      width: 60px;
+      height: 60px;
+      font-size: 48px;
+      font-family: 'Langar', cursive;
+      line-height: 60px;
       text-align: center;
-      transition: background .2s ease-out;
+      transition: background-color .2s ease-out, top .4s cubic-bezier(0.22, 0.61, 0.36, 1), left .4s cubic-bezier(0.22, 0.61, 0.36, 1);
       cursor: pointer;
       z-index: 1;
     }
     .tile:hover {
-      background: #eee;
-      border: 5px solid dodgerblue;
-      border-radius: 4px;
-      margin-top: -4px;
-      margin-left: -4px;
-      z-index: 5;
-    }
-    .tile:after {
-      font-size: 36px;
-      vertical-align: -30px;
+      border: 10px solid rgba(0,0,0,.1);
+      margin-top: -10px;
+      margin-left: -10px;
+      border-radius: 10px;
+      z-index: 99;
     }
     .tile.buff {
-      background: #3d393a !important;
+      background-color: #3d393a !important;
     }
     .tile.buff:after {
       content: 'B';
     }
     .tile.dog {
-      background: #F9690E !important;
+      background-color: #F9690E !important;
     }
     .tile.dog:after {
       content: 'D';
     }
     .tile.player {
-      background: #C91F37 !important;
+      background-color: #C91F37 !important;
     }
     .tile.player:after {
       content: 'P';
     }
     .row-7 {
-      background: #3b98f3 !important;
+      background-color: #3b98f3 !important;
     }
-    .row-1.col-1 { border-top-left-radius: 5px; }
-    .row-1.col-7 { border-top-right-radius: 5px; }
-    .row-7.col-1 { border-bottom-left-radius: 5px; }
-    .row-7.col-7 { border-bottom-right-radius: 5px; }
-    .row-1 { border-top: 0; } .row-7 { border-bottom: 0; }
-    .col-1 { border-left: 0; } .col-7 { border-right: 0; }
+    .grid .row-1.col-1 { border-top-left-radius: 5px; }
+    .grid .row-1.col-7 { border-top-right-radius: 5px; }
+    .grid .row-7.col-1 { border-bottom-left-radius: 5px; }
+    .grid .row-7.col-7 { border-bottom-right-radius: 5px; }
+    .grid .row-1 { border-top: 0; } .grid .row-7 { border-bottom: 0; }
+    .grid .col-1 { border-left: 0; } .grid .col-7 { border-right: 0; }
     .row-1 { top: 10px; }
-    .row-2 { top: 78.57142857142857px; }
-    .row-3 { top: 147.14285714285714px; }
-    .row-4 { top: 215.71428571428572px; }
-    .row-5 { top: 284.2857142857143px; }
-    .row-6 { top: 352.85714285714283px; }
-    .row-7 { top: 421.42857142857144px; }
+    .row-2 { top: 80px; }
+    .row-3 { top: 150px; }
+    .row-4 { top: 220px; }
+    .row-5 { top: 290px; }
+    .row-6 { top: 360px; }
+    .row-7 { top: 430px; }
     .col-1 { left: 10px; }
-    .col-2 { left: 78.57142857142857px; }
-    .col-3 { left: 147.14285714285714px; }
-    .col-4 { left: 215.71428571428572px; }
-    .col-5 { left: 284.2857142857143px; }
-    .col-6 { left: 352.85714285714283px; }
-    .col-7 { left: 421.42857142857144px; }
+    .col-2 { left: 80px; }
+    .col-3 { left: 150px; }
+    .col-4 { left: 220px; }
+    .col-5 { left: 290px; }
+    .col-6 { left: 360px; }
+    .col-7 { left: 430px; }
+    .header {
+      font-family: 'Langar', cursive;
+      letter-spacing: 4pt;
+      margin-bottom: 0rem;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <div style="margin-top: 2rem; padding: 1rem 0; text-align: center;">
+      <h1 class="header">Buffalo Chess</h1>
+    </div>
     <div class="game wild">
       <div class="hud">
+        <div class="tile row-1 col-1 buff"></div>
+        <div class="tile row-1 col-2 buff"></div>
+        <div class="tile row-1 col-3 buff"></div>
+        <div class="tile row-1 col-4 buff"></div>
+        <div class="tile row-1 col-5 buff"></div>
+        <div class="tile row-1 col-6 buff"></div>
+        <div class="tile row-1 col-7 buff"></div>
+        <div class="tile row-6 col-2 dog"></div>
+        <div class="tile row-6 col-3 dog"></div>
+        <div class="tile row-6 col-4 player"></div>
+        <div class="tile row-6 col-5 dog"></div>
+        <div class="tile row-6 col-6 dog"></div>
+      </div>
+      <div class="grid">
         <div class="tile row-1 col-1"></div>
         <div class="tile row-1 col-2"></div>
         <div class="tile row-1 col-3"></div>
@@ -145,57 +167,6 @@
         <div class="tile row-6 col-4"></div>
         <div class="tile row-6 col-5"></div>
         <div class="tile row-6 col-6"></div>
-        <div class="tile row-6 col-7"></div>
-        <div class="tile row-7 col-1"></div>
-        <div class="tile row-7 col-2"></div>
-        <div class="tile row-7 col-3"></div>
-        <div class="tile row-7 col-4"></div>
-        <div class="tile row-7 col-5"></div>
-        <div class="tile row-7 col-6"></div>
-        <div class="tile row-7 col-7"></div>
-      </div>
-      <div class="grid">
-        <div class="tile row-1 col-1 buff"></div>
-        <div class="tile row-1 col-2 buff"></div>
-        <div class="tile row-1 col-3 buff"></div>
-        <div class="tile row-1 col-4 buff"></div>
-        <div class="tile row-1 col-5 buff"></div>
-        <div class="tile row-1 col-6 buff"></div>
-        <div class="tile row-1 col-7 buff"></div>
-        <div class="tile row-2 col-1"></div>
-        <div class="tile row-2 col-2"></div>
-        <div class="tile row-2 col-3"></div>
-        <div class="tile row-2 col-4"></div>
-        <div class="tile row-2 col-5"></div>
-        <div class="tile row-2 col-6"></div>
-        <div class="tile row-2 col-7"></div>
-        <div class="tile row-3 col-1"></div>
-        <div class="tile row-3 col-2"></div>
-        <div class="tile row-3 col-3"></div>
-        <div class="tile row-3 col-4"></div>
-        <div class="tile row-3 col-5"></div>
-        <div class="tile row-3 col-6"></div>
-        <div class="tile row-3 col-7"></div>
-        <div class="tile row-4 col-1"></div>
-        <div class="tile row-4 col-2"></div>
-        <div class="tile row-4 col-3"></div>
-        <div class="tile row-4 col-4"></div>
-        <div class="tile row-4 col-5"></div>
-        <div class="tile row-4 col-6"></div>
-        <div class="tile row-4 col-7"></div>
-        <div class="tile row-5 col-1"></div>
-        <div class="tile row-5 col-2"></div>
-        <div class="tile row-5 col-3"></div>
-        <div class="tile row-5 col-4"></div>
-        <div class="tile row-5 col-5"></div>
-        <div class="tile row-5 col-6"></div>
-        <div class="tile row-5 col-7"></div>
-        <div class="tile row-6 col-1"></div>
-        <div class="tile row-6 col-2 dog"></div>
-        <div class="tile row-6 col-3 dog"></div>
-        <div class="tile row-6 col-4 player"></div>
-        <div class="tile row-6 col-5 dog"></div>
-        <div class="tile row-6 col-6 dog"></div>
         <div class="tile row-6 col-7"></div>
         <div class="tile row-7 col-1"></div>
         <div class="tile row-7 col-2"></div>
