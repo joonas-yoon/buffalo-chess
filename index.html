@@ -33,10 +33,10 @@
       background-image: linear-gradient(180deg, #3b98f3 0%, #3b98f3 10%, #d9bf8c 10%, #d9bf8c 90%, #3b98f3 90%, #3b98f3 100%);
     }
     .markers .tile {
-      z-index: 3;
+      z-index: 2;
     }
     .guide .tile {
-      z-index: 2;
+      z-index: 3;
     }
     .guide .tile {
       display: none;
@@ -262,6 +262,7 @@
   window.addEventListener('load', function(){
     var guide = document.querySelector('.guide');
     var markers = document.querySelector('.markers');
+    var selection = undefined;
 
     function getPos(el) {
       var cls = el.className;
@@ -307,6 +308,7 @@
     function selectDog(evt) {
       removeAllGuides();
       guide.classList.add('dog');
+      selection = evt.target;
       var dy = [-1, -1, -1, 0, 0, 1, 1, 1];
       var dx = [-1, 0, 1, -1, 1, -1, 0, 1];
       var p = getPos(this), dog = this;
@@ -317,7 +319,7 @@
           if (isDog(marker) || isPlayer(marker) || isBuffalo(marker)) break;
           guide.querySelector(rc).classList.add('active');
           guide.querySelector(rc).addEventListener('click', function(evt2){
-            moveTo(dog, r, c);
+            moveTo(selection, r, c);
             removeAllGuides();
           }, { once: true });
         }
@@ -327,6 +329,7 @@
     function selectPlayer(evt) {
       removeAllGuides();
       guide.classList.add('player');
+      selection = evt.target;
       var dy = [-1, -1, -1, 0, 0, 1, 1, 1];
       var dx = [-1, 0, 1, -1, 1, -1, 0, 1];
       var p = getPos(this), player = this;
@@ -337,7 +340,11 @@
           if (isDog(marker) || isPlayer(marker)) break;
           guide.querySelector(rc).classList.add('active');
           guide.querySelector(rc).addEventListener('click', function(evt2){
-            moveTo(player, r, c);
+            var pos = getPos(evt2.target);
+            moveTo(selection, pos.row, pos.col);
+            if (isBuffalo(markers.querySelector('.row-' + pos.row + '.col-' + pos.col))) {
+              markers.querySelector('.row-' + pos.row + '.col-' + pos.col).remove();
+            }
             removeAllGuides();
           }, { once: true });
           if (isBuffalo(marker)) break;
