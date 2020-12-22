@@ -22,7 +22,7 @@
       background-color: #f5d394;
       border-color: #ffe0a5;
     }
-    .grid, .hud, .guide {
+    .grid, .markers, .guide {
       width: 500px;
       height: 500px;
       position: absolute;
@@ -32,7 +32,7 @@
       background-color: rgba(0,0,0,.15);
       background-image: linear-gradient(180deg, #3b98f3 0%, #3b98f3 10%, #d9bf8c 10%, #d9bf8c 90%, #3b98f3 90%, #3b98f3 100%);
     }
-    .hud {
+    .markers {
       z-index: 3;
     }
     .guide {
@@ -74,13 +74,13 @@
       line-height: 60px;
       text-align: center;
       transition: background-color .2s ease-out, top .4s cubic-bezier(0.22, 0.61, 0.36, 1), left .4s cubic-bezier(0.22, 0.61, 0.36, 1);
-      cursor: pointer;
     }
-    .hud .tile:hover {
+    .tile.dog:hover, .tile.player:hover {
       border: 10px solid rgba(0,0,0,.1);
       margin-top: -10px;
       margin-left: -10px;
       border-radius: 10px;
+      cursor: pointer;
       z-index: 99;
     }
     .tile.buff {
@@ -134,13 +134,13 @@
       <h1 class="header">Buffalo Chess</h1>
     </div>
     <div class="game wild">
-      <div class="hud">
+      <div class="markers">
         <div class="tile row-1 col-1 buff"></div>
-        <div class="tile row-1 col-2 buff"></div>
-        <div class="tile row-1 col-3 buff"></div>
-        <div class="tile row-1 col-4 buff"></div>
-        <div class="tile row-1 col-5 buff"></div>
-        <div class="tile row-1 col-6 buff"></div>
+        <div class="tile row-3 col-2 buff"></div>
+        <div class="tile row-3 col-3 buff"></div>
+        <div class="tile row-3 col-4 buff"></div>
+        <div class="tile row-3 col-5 buff"></div>
+        <div class="tile row-2 col-6 buff"></div>
         <div class="tile row-1 col-7 buff"></div>
         <div class="tile row-6 col-2 dog"></div>
         <div class="tile row-6 col-3 dog"></div>
@@ -253,4 +253,75 @@
     </div>
   </div>
 </body>
+<script type="text/javascript">
+  window.addEventListener('load', function(){
+    var guide = document.querySelector('.guide');
+    var markers = document.querySelector('.markers');
+
+    function getPos(el) {
+      var cls = el.className;
+      return {
+        row: Number(cls[cls.indexOf('row-') + 4]),
+        col: Number(cls[cls.indexOf('col-') + 4]),
+      };
+    }
+
+    function moveTo(el, r, c) {
+      var pos = getPos(el);
+      el.classList.replace('row-' + pos.row, 'row-' + r);
+      el.classList.replace('col-' + pos.col, 'col-' + c);
+    }
+
+    function isDog(el) {
+      return el && el.classList.contains('dog');
+    }
+    
+    function isPlayer(el) {
+      return el && el.classList.contains('player');
+    }
+    
+    function isBuffalo(el) {
+      return el && el.classList.contains('buff');
+    }
+    
+    function select(el, initialCls, moveContidion) {
+      var pos = getPos(el);
+      guide.classList = initialCls;
+      guide.querySelectorAll('.tile').forEach(function(tile){
+        var tpos = getPos(tile);
+        var markerCls = '.' + (tile.className.replace('active','').trim().split(' ').join('.'));
+        var marker = markers.querySelector(markerCls);
+        if (!isDog(marker) && !isPlayer(marker) && moveContidion(pos, tpos)) {
+          tile.classList.add('active');
+        }
+        else {
+          tile.classList.remove('active');
+        }
+      });
+    }
+
+    function selectDog(evt) {
+      function isMovable(p1, p2) { // from p1 to p2
+        if (p2.row == 1 || p2.row == 7) return false;
+        return Math.abs(p1.row - p2.row) == Math.abs(p1.col - p2.col);
+      }
+      select(this, 'guide dog', isMovable);
+    }
+
+    function selectPlayer(evt) {
+      function isMovable(p1, p2) { // from p1 to p2
+        if (p2.row == 1 || p2.row == 7) return false;
+        return Math.abs(p1.row - p2.row) <= 1 && Math.abs(p1.col - p2.col) <= 1;
+      }
+      select(this, 'guide player', isMovable);
+    }
+
+    document.querySelectorAll('.markers .tile').forEach(function(e, i){
+      if (e.classList.contains('dog'))
+        e.addEventListener('click', selectDog);
+      if (e.classList.contains('player'))
+        e.addEventListener('click', selectPlayer);
+    });
+  });
+</script>
 </html>
