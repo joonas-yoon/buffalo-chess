@@ -22,7 +22,7 @@
       background-color: #f5d394;
       border-color: #ffe0a5;
     }
-    .grid, .hud {
+    .grid, .hud, .guide {
       width: 500px;
       height: 500px;
       position: absolute;
@@ -30,9 +30,36 @@
     }
     .grid {
       background-color: rgba(0,0,0,.15);
+      background-image: linear-gradient(180deg, #3b98f3 0%, #3b98f3 10%, #d9bf8c 10%, #d9bf8c 90%, #3b98f3 90%, #3b98f3 100%);
     }
     .hud {
       z-index: 3;
+    }
+    .guide {
+      z-index: 2;
+    }
+    .guide .tile {
+      display: none;
+    }
+    .guide .tile.active {
+      display: block;
+      margin-top: -5px;
+      margin-left: -5px;
+      border-radius: 7px;
+      border: 5px solid;
+      opacity: 0.5;
+    }
+    .guide.player .tile.active {
+      border-color: #C91F37;
+      background-color: #C91F37;
+    }
+    .guide.dog .tile.active {
+      border-color: #F9690E;
+      background-color: #F9690E;
+    }
+    .guide.buff .tile.active {
+      border-color: #3d393a;
+      background-color: #3d393a;
     }
     .tile {
       position: absolute;
@@ -48,9 +75,8 @@
       text-align: center;
       transition: background-color .2s ease-out, top .4s cubic-bezier(0.22, 0.61, 0.36, 1), left .4s cubic-bezier(0.22, 0.61, 0.36, 1);
       cursor: pointer;
-      z-index: 1;
     }
-    .tile:hover {
+    .hud .tile:hover {
       border: 10px solid rgba(0,0,0,.1);
       margin-top: -10px;
       margin-left: -10px;
@@ -74,9 +100,6 @@
     }
     .tile.player:after {
       content: 'P';
-    }
-    .row-7 {
-      background-color: #3b98f3 !important;
     }
     .grid .row-1.col-1 { border-top-left-radius: 5px; }
     .grid .row-1.col-7 { border-top-right-radius: 5px; }
@@ -124,6 +147,57 @@
         <div class="tile row-6 col-4 player"></div>
         <div class="tile row-6 col-5 dog"></div>
         <div class="tile row-6 col-6 dog"></div>
+      </div>
+      <div class="guide">
+        <div class="tile row-1 col-1"></div>
+        <div class="tile row-1 col-2"></div>
+        <div class="tile row-1 col-3"></div>
+        <div class="tile row-1 col-4"></div>
+        <div class="tile row-1 col-5"></div>
+        <div class="tile row-1 col-6"></div>
+        <div class="tile row-1 col-7"></div>
+        <div class="tile row-2 col-1"></div>
+        <div class="tile row-2 col-2"></div>
+        <div class="tile row-2 col-3"></div>
+        <div class="tile row-2 col-4"></div>
+        <div class="tile row-2 col-5"></div>
+        <div class="tile row-2 col-6"></div>
+        <div class="tile row-2 col-7"></div>
+        <div class="tile row-3 col-1"></div>
+        <div class="tile row-3 col-2"></div>
+        <div class="tile row-3 col-3"></div>
+        <div class="tile row-3 col-4"></div>
+        <div class="tile row-3 col-5"></div>
+        <div class="tile row-3 col-6"></div>
+        <div class="tile row-3 col-7"></div>
+        <div class="tile row-4 col-1"></div>
+        <div class="tile row-4 col-2"></div>
+        <div class="tile row-4 col-3"></div>
+        <div class="tile row-4 col-4"></div>
+        <div class="tile row-4 col-5"></div>
+        <div class="tile row-4 col-6"></div>
+        <div class="tile row-4 col-7"></div>
+        <div class="tile row-5 col-1"></div>
+        <div class="tile row-5 col-2"></div>
+        <div class="tile row-5 col-3"></div>
+        <div class="tile row-5 col-4"></div>
+        <div class="tile row-5 col-5"></div>
+        <div class="tile row-5 col-6"></div>
+        <div class="tile row-5 col-7"></div>
+        <div class="tile row-6 col-1"></div>
+        <div class="tile row-6 col-2"></div>
+        <div class="tile row-6 col-3"></div>
+        <div class="tile row-6 col-4"></div>
+        <div class="tile row-6 col-5"></div>
+        <div class="tile row-6 col-6"></div>
+        <div class="tile row-6 col-7"></div>
+        <div class="tile row-7 col-1"></div>
+        <div class="tile row-7 col-2"></div>
+        <div class="tile row-7 col-3"></div>
+        <div class="tile row-7 col-4"></div>
+        <div class="tile row-7 col-5"></div>
+        <div class="tile row-7 col-6"></div>
+        <div class="tile row-7 col-7"></div>
       </div>
       <div class="grid">
         <div class="tile row-1 col-1"></div>
