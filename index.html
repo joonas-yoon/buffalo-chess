@@ -309,13 +309,17 @@
       guide.classList.add('dog');
       var dy = [-1, -1, -1, 0, 0, 1, 1, 1];
       var dx = [-1, 0, 1, -1, 1, -1, 0, 1];
-      var p = getPos(this);
+      var p = getPos(this), dog = this;
       for(var d=0; d<8; ++d){
-        for(var r = p.row + dy[d], c = p.col + dx[d], t = 0; isMovableRange(r, c) && t++ < 20; r += dy[d], c += dx[d]){
+        for(let r = p.row + dy[d], c = p.col + dx[d], t = 0; isMovableRange(r, c) && t++ < 20; r += dy[d], c += dx[d]){
           var rc = '.row-' + r + '.col-' + c;
           var marker = markers.querySelector(rc);
           if (isDog(marker) || isPlayer(marker) || isBuffalo(marker)) break;
           guide.querySelector(rc).classList.add('active');
+          guide.querySelector(rc).addEventListener('click', function(evt2){
+            moveTo(dog, r, c);
+            removeAllGuides();
+          }, { once: true });
         }
       }
     }
@@ -325,13 +329,17 @@
       guide.classList.add('player');
       var dy = [-1, -1, -1, 0, 0, 1, 1, 1];
       var dx = [-1, 0, 1, -1, 1, -1, 0, 1];
-      var p = getPos(this);
+      var p = getPos(this), player = this;
       for(var d=0; d<8; ++d){
-        for(var r = p.row + dy[d], c = p.col + dx[d], t = 0; isMovableRange(r, c) && t++ < 1; r += dy[d], c += dx[d]){
+        for(let r = p.row + dy[d], c = p.col + dx[d], t = 0; isMovableRange(r, c) && t++ < 1; r += dy[d], c += dx[d]){
           var rc = '.row-' + r + '.col-' + c;
           var marker = markers.querySelector(rc);
           if (isDog(marker) || isPlayer(marker)) break;
           guide.querySelector(rc).classList.add('active');
+          guide.querySelector(rc).addEventListener('click', function(evt2){
+            moveTo(player, r, c);
+            removeAllGuides();
+          }, { once: true });
           if (isBuffalo(marker)) break;
         }
       }
