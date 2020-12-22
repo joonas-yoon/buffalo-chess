@@ -32,10 +32,10 @@
       background-color: rgba(0,0,0,.15);
       background-image: linear-gradient(180deg, #3b98f3 0%, #3b98f3 10%, #d9bf8c 10%, #d9bf8c 90%, #3b98f3 90%, #3b98f3 100%);
     }
-    .markers {
+    .markers .tile {
       z-index: 3;
     }
-    .guide {
+    .guide .tile {
       z-index: 2;
     }
     .guide .tile {
@@ -48,6 +48,11 @@
       border-radius: 7px;
       border: 5px solid;
       opacity: 0.5;
+      transition: opacity .2s ease-out;
+      cursor: pointer;
+    }
+    .guide .tile.active:hover {
+      opacity: 0.9;
     }
     .guide.player .tile.active {
       border-color: #C91F37;
@@ -283,37 +288,53 @@
     function isBuffalo(el) {
       return el && el.classList.contains('buff');
     }
-    
-    function select(el, initialCls, moveContidion) {
-      var pos = getPos(el);
-      guide.classList = initialCls;
+
+    function isInRange(r, c) {
+      return 1 <= r && r <= 7 && 1 <= c && c <= 7;
+    }
+
+    function isMovableRange(r, c) {
+      return 2 <= r && r <= 6 && 1 <= c && c <= 7;
+    }
+
+    function removeAllGuides() {
+      guide.classList = 'guide';
       guide.querySelectorAll('.tile').forEach(function(tile){
-        var tpos = getPos(tile);
-        var markerCls = '.' + (tile.className.replace('active','').trim().split(' ').join('.'));
-        var marker = markers.querySelector(markerCls);
-        if (!isDog(marker) && !isPlayer(marker) && moveContidion(pos, tpos)) {
-          tile.classList.add('active');
-        }
-        else {
-          tile.classList.remove('active');
-        }
+        tile.classList.remove('active');
       });
     }
 
     function selectDog(evt) {
-      function isMovable(p1, p2) { // from p1 to p2
-        if (p2.row == 1 || p2.row == 7) return false;
-        return Math.abs(p1.row - p2.row) == Math.abs(p1.col - p2.col);
+      removeAllGuides();
+      guide.classList.add('dog');
+      var dy = [-1, -1, -1, 0, 0, 1, 1, 1];
+      var dx = [-1, 0, 1, -1, 1, -1, 0, 1];
+      var p = getPos(this);
+      for(var d=0; d<8; ++d){
+        for(var r = p.row + dy[d], c = p.col + dx[d], t = 0; isMovableRange(r, c) && t++ < 20; r += dy[d], c += dx[d]){
+          var rc = '.row-' + r + '.col-' + c;
+          var marker = markers.querySelector(rc);
+          if (isDog(marker) || isPlayer(marker) || isBuffalo(marker)) break;
+          guide.querySelector(rc).classList.add('active');
+        }
       }
-      select(this, 'guide dog', isMovable);
     }
 
     function selectPlayer(evt) {
-      function isMovable(p1, p2) { // from p1 to p2
-        if (p2.row == 1 || p2.row == 7) return false;
-        return Math.abs(p1.row - p2.row) <= 1 && Math.abs(p1.col - p2.col) <= 1;
+      removeAllGuides();
+      guide.classList.add('player');
+      var dy = [-1, -1, -1, 0, 0, 1, 1, 1];
+      var dx = [-1, 0, 1, -1, 1, -1, 0, 1];
+      var p = getPos(this);
+      for(var d=0; d<8; ++d){
+        for(var r = p.row + dy[d], c = p.col + dx[d], t = 0; isMovableRange(r, c) && t++ < 1; r += dy[d], c += dx[d]){
+          var rc = '.row-' + r + '.col-' + c;
+          var marker = markers.querySelector(rc);
+          if (isDog(marker) || isPlayer(marker)) break;
+          guide.querySelector(rc).classList.add('active');
+          if (isBuffalo(marker)) break;
+        }
       }
-      select(this, 'guide player', isMovable);
     }
 
     document.querySelectorAll('.markers .tile').forEach(function(e, i){
