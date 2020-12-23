@@ -100,11 +100,16 @@ HTMLActuator.prototype.addGuide = function (selection, dist) {
     var dy = [-1, -1, -1, 0, 0, 1, 1, 1];
     var dx = [-1, 0, 1, -1, 1, -1, 0, 1];
     var tiles = [];
+    var isPlayer = selection.value == 'player';
     for (var d = 0; d < 8; ++d){
         let r = selection.row + dy[d], c = selection.col + dx[d];
         for (var t = 0; isMovableRange(r, c) && t < dist; t++){
             var marker = this.markerGrid.getTile(r, c);
-            if (marker) break;
+            
+            if (marker) {
+                if (!isPlayer) break;
+                if (isPlayer && marker.value != 'buff') break;
+            }
 
             var tile = new Tile({row: r, col: c}, selection.value);
             tile.activate(true);
@@ -186,14 +191,14 @@ GameManager.prototype.addStartTiles = function () {
                     setTimeout(function(){
                         var bs = [];
                         for (var i = 0; i < buffaloes.length; ++i) {
-                            if (buffaloes[i].row + 1 > 7) continue;
+                            if (buffaloes[i].row + 1 > self.rows) continue;
                             if (self.actuator.markerGrid.getTile(buffaloes[i].row + 1, buffaloes[i].col)) continue;
                             bs.push(buffaloes[i]);
                         }
                         if (bs.length) {
                             var b = bs[Math.floor(Math.random() * bs.length)].getPosition();
                             self.actuator.markerGrid.moveTile(b, {row: b.row + 1, col: b.col});
-                            if (b.row + 1 == 7) {
+                            if (b.row + 1 == self.rows) {
                                 self.gameover(false);
                             }
                         } else {
