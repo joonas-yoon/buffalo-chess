@@ -184,10 +184,24 @@ GameManager.prototype.addStartTiles = function () {
             
             var guideListener = {
                 handleEvent: function (evt) {
+                    // selection moves
                     var oldPosition = selection.getPosition();
                     var newPosition = evt.target.ref.getPosition();
+
                     self.actuator.removeAllGuides();
+
+                    // if player, buffalo can be killed
+                    if (isPlayer) {
+                        var tile = self.actuator.markerGrid.getTile(newPosition.row, newPosition.col);
+                        if (tile) {
+                            buffaloes.splice(buffaloes.indexOf(tile), 1);
+                            tile.element.remove();
+                        }
+                    }
+
                     self.actuator.markerGrid.moveTile(oldPosition, newPosition);
+
+                    // buffalo moves
                     setTimeout(function(){
                         var bs = [];
                         for (var i = 0; i < buffaloes.length; ++i) {
@@ -202,9 +216,9 @@ GameManager.prototype.addStartTiles = function () {
                                 self.gameover(false);
                             }
                         } else {
-                            self.gameover(false);
+                            self.gameover(true);
                         }
-                    }, 100);
+                    }, 200);
                 }
             };
             guides.forEach(function(tile){
