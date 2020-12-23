@@ -64,6 +64,7 @@ Grid.prototype.getTile = function (row, col) {
 Grid.prototype.moveTile = function (pos1, pos2) {
     this.tiles[pos2.row + '-' + pos2.col] = this.tiles[pos1.row + '-' + pos1.col];
     delete this.tiles[pos1.row + '-' + pos1.col];
+    this.tiles[pos2.row + '-' + pos2.col].movePosition(pos2);
 };
 
 Grid.prototype.clear = function () {
@@ -122,10 +123,8 @@ function GameManager() {
     this.rows = 7;
     this.cols = 7;
 
-    this.markers = [];
-    this.selection = null;
-
     this.actuator = new HTMLActuator;
+    this.isGameover = false;
 
     this.setup();
 }
@@ -147,6 +146,10 @@ GameManager.prototype.setup = function () {
     });
 };
 
+GameManager.prototype.gameover = function (isWon) {
+    this.isGameover = true;
+    window.alert('You ' + (isWon ? 'Win!' : 'Lose!'));
+};
 
 GameManager.prototype.addStartTiles = function () {
     var self = this;
@@ -154,33 +157,49 @@ GameManager.prototype.addStartTiles = function () {
     var initPosBuffaloes = [];
     for (var i=1; i <= this.cols; ++i) initPosBuffaloes.push([1, i]);
     var middle = Math.ceil(this.rows / 2);
-    var initPosDogs = [[this.rows - 1, middle - 2], [this.rows - 1, middle - 1], [this.rows - 1, middle + 1], [this.rows - 1, middle + 2]];
+    var initPosDogs = [[this.rows - 1, middle - 1], [this.rows - 1, middle + 1]];
     var initPosPlayer = [[this.rows - 1, middle]];
+    var buffaloes = [];
 
     // buffaloes
     initPosBuffaloes.forEach(function(pos, i) {
         var tile = new Tile({ row: pos[0], col: pos[1] }, 'buff');
-        self.markers.push(tile);
+        buffaloes.push(tile);
         self.actuator.addTile(self.actuator.markerGrid, tile);
     });
 
     var listener = {
-        actuator: this.actuator,
         handleEvent: function (evt) {
-            this.actuator.removeAllGuides();
+            if (self.isGameover) return;
+
+            self.actuator.removeAllGuides();
             var selection = evt.target.ref;
             var isPlayer = selection.value === 'player';
-            var guides = this.actuator.addGuide(selection, isPlayer ? 1 : undefined);
+            var guides = self.actuator.addGuide(selection, isPlayer ? 1 : undefined);
             
             var guideListener = {
-                selection: selection,
-                actuator: this.actuator,
                 handleEvent: function (evt) {
-                    var oldPosition = this.selection.getPosition();
+                    var oldPosition = selection.getPosition();
                     var newPosition = evt.target.ref.getPosition();
-                    this.selection.movePosition(newPosition);
-                    this.actuator.removeAllGuides();
-                    this.actuator.markerGrid.moveTile(oldPosition, newPosition);
+                    self.actuator.removeAllGuides();
+                    self.actuator.markerGrid.moveTile(oldPosition, newPosition);
+                    setTimeout(function(){
+                        var bs = [];
+                        for (var i = 0; i < buffaloes.length; ++i) {
+                            if (buffaloes[i].row + 1 > 7) continue;
+                            if (self.actuator.markerGrid.getTile(buffaloes[i].row + 1, buffaloes[i].col)) continue;
+                            bs.push(buffaloes[i]);
+                        }
+                        if (bs.length) {
+                            var b = bs[Math.floor(Math.random() * bs.length)].getPosition();
+                            self.actuator.markerGrid.moveTile(b, {row: b.row + 1, col: b.col});
+                            if (b.row + 1 == 7) {
+                                self.gameover(false);
+                            }
+                        } else {
+                            self.gameover(false);
+                        }
+                    }, 100);
                 }
             };
             guides.forEach(function(tile){
@@ -192,7 +211,6 @@ GameManager.prototype.addStartTiles = function () {
     // dogs
     initPosDogs.forEach(function(pos, i) {
         var tile = new Tile({ row: pos[0], col: pos[1] }, 'dog');
-        self.markers.push(tile);
         self.actuator.addTile(self.actuator.markerGrid, tile);
         tile.addEvent('click', listener);
     });
@@ -200,7 +218,6 @@ GameManager.prototype.addStartTiles = function () {
     // player
     initPosPlayer.forEach(function(pos, i) {
         var tile = new Tile({ row: pos[0], col: pos[1] }, 'player');
-        self.markers.push(tile);
         self.actuator.addTile(self.actuator.markerGrid, tile);
         tile.addEvent('click', listener);
     });
