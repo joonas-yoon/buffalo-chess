@@ -61,8 +61,9 @@ Grid.prototype.getTile = function (row, col) {
     return this.tiles[row + '-' + col];
 };
 
-Grid.prototype.removeTile = function (row, col) {
-    delete this.tiles[row + '-' + col];
+Grid.prototype.moveTile = function (pos1, pos2) {
+    this.tiles[pos2.row + '-' + pos2.col] = this.tiles[pos1.row + '-' + pos1.col];
+    delete this.tiles[pos1.row + '-' + pos1.col];
 };
 
 Grid.prototype.clear = function () {
@@ -130,6 +131,8 @@ function GameManager() {
 }
 
 GameManager.prototype.setup = function () {
+    var self = this;
+
     for (var r = 1; r <= this.rows; ++r) {
         for (var c = 1; c <= this.cols; ++c) {
             this.actuator.addTile(this.actuator.backGrid, new Tile({ row: r, col: c }));
@@ -137,6 +140,11 @@ GameManager.prototype.setup = function () {
     }
 
     this.addStartTiles();
+
+    // release guides
+    this.actuator.backGrid.container.addEventListener('click', function(evt) {
+        self.actuator.removeAllGuides();
+    });
 };
 
 
@@ -168,9 +176,11 @@ GameManager.prototype.addStartTiles = function () {
                 selection: selection,
                 actuator: this.actuator,
                 handleEvent: function (evt) {
-                    this.selection.movePosition(evt.target.ref.getPosition());
-                    // TODO: 'grid' moves 'tile'
+                    var oldPosition = this.selection.getPosition();
+                    var newPosition = evt.target.ref.getPosition();
+                    this.selection.movePosition(newPosition);
                     this.actuator.removeAllGuides();
+                    this.actuator.markerGrid.moveTile(oldPosition, newPosition);
                 }
             };
             guides.forEach(function(tile){
