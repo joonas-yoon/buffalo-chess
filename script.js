@@ -95,15 +95,25 @@ Grid.prototype.isInRangeMovable = function (row, col) {
 };
 
 function HTMLActuator() {
-    this.markerGrid = new Grid(document.querySelector('.markers'));
-    this.guideGrid  = new Grid(document.querySelector('.guide'));
-    this.backGrid   = new Grid(document.querySelector('.grid'));
+    this.gameContainer = document.querySelector('.game');
+    this.restartButton = this.gameContainer.querySelector('.result .button');
+
+    this.markerGrid = new Grid(this.gameContainer.querySelector('.markers'));
+    this.guideGrid  = new Grid(this.gameContainer.querySelector('.guide'));
+    this.backGrid   = new Grid(this.gameContainer.querySelector('.grid'));
+
 }
 
 HTMLActuator.prototype.setup = function (rows, cols) {
     this.markerGrid.setSize(rows, cols);
     this.guideGrid.setSize(rows, cols);
     this.backGrid.setSize(rows, cols);
+};
+
+HTMLActuator.prototype.clear = function () {
+    this.markerGrid.clear();
+    this.guideGrid.clear();
+    this.backGrid.clear();
 };
 
 HTMLActuator.prototype.addTile = function (grid, tile) {
@@ -170,12 +180,33 @@ function GameManager() {
 
     this.actuator = new HTMLActuator;
     this.cemetery = new Cemetery;
-    this.player = new Tile({ row: this.rows - 1, col: Math.ceil(this.cols / 2) }, 'player');
+
+    this.player = undefined;
+    this.dogs = [];
 
     this.setup();
 }
 
+GameManager.prototype.init = function () {
+    this.isGameover = false;
+    document.body.removeAttribute('class');
+
+    this.player = new Tile({ row: this.rows - 1, col: Math.ceil(this.cols / 2) }, 'player');
+
+    while (this.dogs.length) {
+        this.dogs[this.dogs.length - 1].remove();
+        this.dogs.pop();
+    }
+    this.dogs = [];
+    
+    this.cemetery.clear();
+
+    this.actuator.clear();
+};
+
 GameManager.prototype.setup = function () {
+    this.init();
+
     this.actuator.setup(this.rows, this.cols);
 
     for (var r = 1; r <= this.rows; ++r) {
@@ -191,6 +222,11 @@ GameManager.prototype.setup = function () {
     this.actuator.backGrid.container.addEventListener('click', function(evt) {
         self.actuator.removeAllGuides();
     });
+
+    this.actuator.restartButton.addEventListener('click', function(evt){
+        self.init();
+        self.setup();
+    });
 };
 
 GameManager.prototype.gameover = function (isWon) {
@@ -198,38 +234,38 @@ GameManager.prototype.gameover = function (isWon) {
     document.body.setAttribute('class', 'gameover' + (isWon ? ' win' : ''));
 
     var resultContainer = document.querySelector('.game .result');
-    var button = resultContainer.querySelector('.button');
     var msg = resultContainer.querySelector('.message');
-    resultContainer.style.display = 'flex';
     msg.innerHTML = 'You ' + (isWon ? 'Win!' : 'Lose&mldr;');
-
-    // temporary patch code for try again
-    button.addEventListener('click', function(){
-        window.location.reload();
-    });
 };
 
-GameManager.prototype.selectNextBuffalo = function (player, buffaloes) {
+GameManager.prototype.selectNextBuffalo = function (buffaloes) {
     // Sometimes, it selects a random buffalo (probability: 1%)
     if (Math.random() < 0.01) {
         return buffaloes[Math.floor(Math.random() * buffaloes.length)];
     }
-
+    
     var self = this;
     
     // Or with my heuristic function
     function calcWeight(p, b) {
         // it will be dead in next turn
+        var returnWeight = true;
         if (b.row + 1 != self.rows && Math.abs(p.row - b.row) <= 1 && Math.abs(p.col - b.col) <= 1) {
+            // but, he has will (10%)
+            if (Math.random() >= 0.1) returnWeight = false;
+        }
+        // returns calculated weight
+        if (returnWeight) {
+            return 10 * b.row + Math.abs(p.col - b.col) + Math.random();
+        } else {
+            // never selected
             return -999;
         }
-        // or not, returns calculated weight
-        return 10 * b.row + Math.abs(p.col - b.col) + Math.random();
     };
 
     var result = buffaloes[0];
     for (var i = 1; i < buffaloes.length; ++i) {
-        if (calcWeight(player, result) < calcWeight(player, buffaloes[i])) {
+        if (calcWeight(this.player, result) < calcWeight(this.player, buffaloes[i])) {
             result = buffaloes[i];
         }
     }
@@ -290,7 +326,7 @@ GameManager.prototype.addStartTiles = function () {
                             bs.push(buffaloes[i]);
                         }
                         if (bs.length) {
-                            var b = self.selectNextBuffalo(self.player, bs).getPosition();
+                            var b = self.selectNextBuffalo(bs).getPosition();
                             self.actuator.markerGrid.moveTile(b, {row: b.row + 1, col: b.col});
                             if (b.row + 1 == self.rows) {
                                 self.gameover(false);
@@ -311,12 +347,13 @@ GameManager.prototype.addStartTiles = function () {
     initPosDogs.forEach(function(pos, i) {
         var tile = new Tile({ row: pos[0], col: pos[1] }, 'dog');
         self.actuator.addTile(self.actuator.markerGrid, tile);
+        self.dogs.push(tile);
         tile.addEvent('click', listener);
     });
 
     // player
-    self.actuator.addTile(self.actuator.markerGrid, self.player);
-    self.player.addEvent('click', listener);
+    this.actuator.addTile(this.actuator.markerGrid, this.player);
+    this.player.addEvent('click', listener);
 };
 
 window.addEventListener('load', function(){
