@@ -195,7 +195,18 @@ GameManager.prototype.setup = function () {
 
 GameManager.prototype.gameover = function (isWon) {
     this.isGameover = true;
-    window.alert('You ' + (isWon ? 'Win!' : 'Lose!'));
+    document.body.className = 'gameover';
+
+    var resultContainer = document.querySelector('.game .result');
+    var button = resultContainer.querySelector('.button');
+    var msg = resultContainer.querySelector('.message');
+    resultContainer.style.display = 'flex';
+    msg.innerHTML = 'You ' + (isWon ? 'Win!' : 'Lose&mldr;');
+
+    // temporary patch code for try again
+    button.addEventListener('click', function(){
+        window.location.reload();
+    });
 };
 
 GameManager.prototype.selectNextBuffalo = function (player, buffaloes) {

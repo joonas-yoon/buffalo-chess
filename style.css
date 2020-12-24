@@ -3,6 +3,14 @@
 * {
   box-sizing: border-box;
 }
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 body {
   background-color: #ffe0a5;
   margin: 0;
@@ -39,17 +47,60 @@ p {
   position: relative;
   margin: 0 auto;
 }
-.game, .grid, .markers, .guide {
+.game, .box {
   width: 500px;
   height: 360px;
 }
-.grid, .markers, .guide {
+.box {
   position: absolute;
   border-radius: 10px;
 }
 .grid {
   background-color: rgba(0,0,0,.15);
   background-image: linear-gradient(180deg, #3b98f3 0%, #3b98f3 20%, #d9bf8c 22%, #d9bf8c 77%, #3b98f3 80%, #3b98f3 100%);
+}
+body.gameover .result {
+  display: flex;
+}
+.result {
+  display: none;
+  width: 100%;
+  padding: 0;
+  color: #7d6f52;
+  background-color: rgba(255, 224, 165, 0.5);
+  top: 0;
+  left: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+  -webkit-animation: fade-in 1000ms ease-in-out;
+  -moz-animation: fade-in 1000ms ease-in-out;
+  animation: fade-in 1000ms ease-in-out;
+  -webkit-animation-fill-mode: both;
+  -moz-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+.result .message {
+  margin: 1rem auto;
+  font-size: 3rem;
+  font-family: 'Langar', cursive;
+  letter-spacing: 3px;
+}
+.result .button {
+  padding: 10px 15px;
+  margin-top: 1rem;
+  background-color: #7d6f52;
+  color: white;
+  border-radius: 3px;
+  outline: 0;
+  border: 0;
+  font-size: medium;
+  font-family: 'Roboto Slab', sans-serif;
+  cursor: pointer;
+}
+.result .button:hover {
+  background-color: #5f533b;
 }
 .markers .tile {
   z-index: 2;
@@ -72,6 +123,9 @@ p {
 }
 .guide .tile.active:hover {
   opacity: 0.9;
+}
+.guide .tile:after {
+  content: '' !important;
 }
 .guide.player .tile.active {
   border-color: #C91F37;
@@ -145,7 +199,7 @@ p {
 .col-6 { left: 360px; }
 .col-7 { left: 430px; }
 .cemetery {
-  margin-top: 0.5rem;
+  margin-top: 8px;
   padding: 8px 10px;
   border-radius: 5px;
   background-color: rgba(0,0,0,.05);
@@ -169,7 +223,7 @@ p {
   .container {
     max-width: 430px;
   }
-  .game, .grid, .markers, .guide {
+  .game, .box {
     width: 430px;
     height: 310px;
   }
@@ -197,7 +251,7 @@ p {
   .container {
     max-width: 320px;
   }
-  .game, .grid, .markers, .guide {
+  .game, .box {
     width: 320px;
     height: 230px;
   }
