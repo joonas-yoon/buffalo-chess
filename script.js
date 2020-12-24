@@ -203,11 +203,15 @@ GameManager.prototype.selectNextBuffalo = function (player, buffaloes) {
     if (Math.random() < 0.01) {
         return buffaloes[Math.floor(Math.random() * buffaloes.length)];
     }
+
+    var self = this;
     
     // Or with my heuristic function
     function calcWeight(p, b) {
         // it will be dead in next turn
-        if (Math.abs(p.row - b.row) <= 1 && Math.abs(p.col - b.col) <= 1) return -999;
+        if (b.row + 1 != self.rows && Math.abs(p.row - b.row) <= 1 && Math.abs(p.col - b.col) <= 1) {
+            return -999;
+        }
         // or not, returns calculated weight
         return 10 * b.row + Math.abs(p.col - b.col);
     };
