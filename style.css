@@ -167,3 +167,62 @@ p {
   top: inherit !important;
   left: inherit !important;
 }
+
+@media (min-width: 431px) and (max-width: 540px) {
+  .container {
+    max-width: 430px;
+  }
+  .game, .grid, .markers, .guide {
+    width: 430px;
+    height: 310px;
+  }
+  .tile {
+    width: 50px;
+    height: 50px;
+    font-size: 42px;
+    line-height: 50px;
+  }
+  .row-1 { top: 10px; }
+  .row-2 { top: 70px; }
+  .row-3 { top: 130px; }
+  .row-4 { top: 190px; }
+  .row-5 { top: 250px; }
+  .col-1 { left: 10px; }
+  .col-2 { left: 70px; }
+  .col-3 { left: 130px; }
+  .col-4 { left: 190px; }
+  .col-5 { left: 250px; }
+  .col-6 { left: 310px; }
+  .col-7 { left: 370px; }
+}
+
+@media (max-width: 430px) {
+  .container {
+    max-width: 320px;
+  }
+  .game, .grid, .markers, .guide {
+    width: 320px;
+    height: 230px;
+  }
+  .grid, .markers, .guide {
+    border-radius: 5px;
+  }
+  .tile {
+    width: 40px;
+    height: 40px;
+    font-size: 32px;
+    line-height: 42px;
+  }
+  .row-1 { top: 5px; }
+  .row-2 { top: 50px; }
+  .row-3 { top: 95px; }
+  .row-4 { top: 140px; }
+  .row-5 { top: 185px; }
+  .col-1 { left: 5px; }
+  .col-2 { left: 50px; }
+  .col-3 { left: 95px; }
+  .col-4 { left: 140px; }
+  .col-5 { left: 185px; }
+  .col-6 { left: 230px; }
+  .col-7 { left: 275px; }
+}
