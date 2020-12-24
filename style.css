@@ -265,9 +265,14 @@ body.gameover.win .grid .tile {
   .game, .box {
     width: 320px;
     height: 230px;
-  }
-  .grid, .markers, .guide {
     border-radius: 5px;
+  }
+  .result .message {
+    margin: 0 auto;
+    font-size: 2rem;
+  }
+  .result .button {
+    margin-top: 0.5rem;
   }
   .tile {
     width: 40px;

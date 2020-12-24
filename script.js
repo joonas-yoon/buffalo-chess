@@ -101,7 +101,6 @@ function HTMLActuator() {
     this.markerGrid = new Grid(this.gameContainer.querySelector('.markers'));
     this.guideGrid  = new Grid(this.gameContainer.querySelector('.guide'));
     this.backGrid   = new Grid(this.gameContainer.querySelector('.grid'));
-
 }
 
 HTMLActuator.prototype.setup = function (rows, cols) {
@@ -243,20 +242,31 @@ GameManager.prototype.selectNextBuffalo = function (buffaloes) {
     if (Math.random() < 0.01) {
         return buffaloes[Math.floor(Math.random() * buffaloes.length)];
     }
-    
+
     var self = this;
+
+    function blockedByDog(pos) {
+        for (var i = 0; i < self.dogs.length; ++i) {
+            if (pos.col == self.dogs[i].col) return 1;
+        }
+        return 0;
+    }
     
     // Or with my heuristic function
     function calcWeight(p, b) {
+        // it can go in
+        if (b.row + 1 == self.rows){
+            return 999;
+        }
         // it will be dead in next turn
         var returnWeight = true;
-        if (b.row + 1 != self.rows && Math.abs(p.row - b.row) <= 1 && Math.abs(p.col - b.col) <= 1) {
+        if (Math.abs(p.row - b.row) <= 1 && Math.abs(p.col - b.col) <= 1) {
             // but, he has will (10%)
             if (Math.random() >= 0.1) returnWeight = false;
         }
         // returns calculated weight
         if (returnWeight) {
-            return 10 * b.row + Math.abs(p.col - b.col) + Math.random();
+            return 5 * (b.row - blockedByDog(b)) + Math.abs(p.col - b.col) + Math.random();
         } else {
             // never selected
             return -999;
