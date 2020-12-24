@@ -170,6 +170,7 @@ function GameManager() {
 
     this.actuator = new HTMLActuator;
     this.cemetery = new Cemetery;
+    this.player = new Tile({ row: this.rows - 1, col: Math.ceil(this.cols / 2) }, 'player');
 
     this.setup();
 }
@@ -199,8 +200,7 @@ GameManager.prototype.gameover = function (isWon) {
 
 GameManager.prototype.selectNextBuffalo = function (player, buffaloes) {
     // Sometimes, it selects a random buffalo (probability: 10%)
-    if (Math.random() <= 0.1) {
-        console.log('this!');
+    if (Math.random() < 0.1) {
         return buffaloes[Math.floor(Math.random() * buffaloes.length)];
     }
     
@@ -225,7 +225,6 @@ GameManager.prototype.addStartTiles = function () {
     for (var i = 1; i <= this.cols; ++i) initPosBuffaloes.push([1, i]);
     var middle = Math.ceil(this.cols / 2);
     var initPosDogs = [[this.rows - 1, middle - 1], [this.rows - 1, middle + 1]];
-    var initPosPlayer = [[this.rows - 1, middle]];
     var buffaloes = [];
 
     // buffaloes
@@ -273,7 +272,7 @@ GameManager.prototype.addStartTiles = function () {
                             bs.push(buffaloes[i]);
                         }
                         if (bs.length) {
-                            var b = self.selectNextBuffalo(oldPosition, bs).getPosition();
+                            var b = self.selectNextBuffalo(self.player, bs).getPosition();
                             self.actuator.markerGrid.moveTile(b, {row: b.row + 1, col: b.col});
                             if (b.row + 1 == self.rows) {
                                 self.gameover(false);
@@ -298,11 +297,8 @@ GameManager.prototype.addStartTiles = function () {
     });
 
     // player
-    initPosPlayer.forEach(function(pos, i) {
-        var tile = new Tile({ row: pos[0], col: pos[1] }, 'player');
-        self.actuator.addTile(self.actuator.markerGrid, tile);
-        tile.addEvent('click', listener);
-    });
+    self.actuator.addTile(self.actuator.markerGrid, self.player);
+    self.player.addEvent('click', listener);
 };
 
 window.addEventListener('load', function(){
