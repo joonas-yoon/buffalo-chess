@@ -64,7 +64,14 @@ body.gameover .result {
 }
 body.gameover.win .result {
   color: #171700;
-  background-color: rgb(255, 251, 221, 0.5) !important;
+  background-color: rgb(255, 255, 255, 0.5) !important;
+}
+body.gameover.win .grid {
+  background-color: #f9e547 !important;
+  background-image: none !important;
+}
+body.gameover.win .grid .tile {
+  background-color: #fff28a !important;
 }
 .result {
   display: none;

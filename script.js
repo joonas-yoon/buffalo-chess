@@ -224,7 +224,7 @@ GameManager.prototype.selectNextBuffalo = function (player, buffaloes) {
             return -999;
         }
         // or not, returns calculated weight
-        return 10 * b.row + Math.abs(p.col - b.col);
+        return 10 * b.row + Math.abs(p.col - b.col) + Math.random();
     };
 
     var result = buffaloes[0];
