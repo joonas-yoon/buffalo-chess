@@ -195,7 +195,7 @@ GameManager.prototype.setup = function () {
 
 GameManager.prototype.gameover = function (isWon) {
     this.isGameover = true;
-    document.body.className = 'gameover';
+    document.body.setAttribute('class', 'gameover' + (isWon ? ' win' : ''));
 
     var resultContainer = document.querySelector('.game .result');
     var button = resultContainer.querySelector('.button');

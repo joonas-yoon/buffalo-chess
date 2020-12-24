@@ -62,6 +62,10 @@ p {
 body.gameover .result {
   display: flex;
 }
+body.gameover.win .result {
+  color: #171700;
+  background-color: rgb(255, 251, 221, 0.5) !important;
+}
 .result {
   display: none;
   width: 100%;
