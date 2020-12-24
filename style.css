@@ -1,0 +1,228 @@
+@import url('https://fonts.googleapis.com/css2?family=Langar&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap');
+* {
+  box-sizing: border-box;
+}
+body {
+  background-color: #ffe0a5;
+  margin: 0;
+  padding: 0;
+}
+p {
+  font-family: 'Roboto Slab', serif;
+  font-weight: 200;
+  font-size: medium;
+}
+.container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 0;
+}
+.header {
+  margin-top: 2rem;
+  padding: 0;
+  text-align: center;
+}
+.header h1 {
+  font-family: 'Langar', cursive;
+  letter-spacing: 4pt;
+  margin-bottom: 0rem;
+}
+.divider {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: rgba(0,0,0,.1);
+}
+.game {
+  position: relative;
+  margin: 0 auto;
+}
+.game.wild .grid .tile {
+  background-color: #f5d394;
+  border-color: #ffe0a5;
+}
+.game, .grid, .markers, .guide {
+  width: 500px;
+  height: 360px;
+}
+.grid, .markers, .guide {
+  position: absolute;
+  border-radius: 10px;
+}
+.grid {
+  background-color: rgba(0,0,0,.15);
+  background-image: linear-gradient(180deg, #3b98f3 0%, #3b98f3 20%, #d9bf8c 22%, #d9bf8c 77%, #3b98f3 80%, #3b98f3 100%);
+}
+.markers .tile {
+  z-index: 2;
+}
+.guide .tile {
+  z-index: 3;
+}
+.guide .tile {
+  display: none;
+}
+.guide .tile.active {
+  display: block;
+  margin-top: -5px;
+  margin-left: -5px;
+  border-radius: 7px;
+  border: 5px solid;
+  opacity: 0.5;
+  transition: opacity .2s ease-out;
+  cursor: pointer;
+}
+.guide .tile.active:hover {
+  opacity: 0.9;
+}
+.guide.player .tile.active {
+  border-color: #C91F37;
+  background-color: #C91F37;
+}
+.guide.dog .tile.active {
+  border-color: #F9690E;
+  background-color: #F9690E;
+}
+.guide.buff .tile.active {
+  border-color: #3d393a;
+  background-color: #3d393a;
+}
+.tile {
+  position: absolute;
+  border: 0;
+  border-radius: 5px;
+  color: rgba(255,255,255,.5);
+  background-color: #fff;
+  width: 60px;
+  height: 60px;
+  font-size: 48px;
+  font-family: 'Langar', cursive;
+  line-height: 60px;
+  text-align: center;
+  transition: background-color .2s ease-out, top .4s cubic-bezier(0.22, 0.61, 0.36, 1), left .4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  box-sizing: content-box !important;
+}
+.tile.dog:hover, .tile.player:hover {
+  border: 10px solid rgba(0,0,0,.1);
+  margin-top: -10px;
+  margin-left: -10px;
+  border-radius: 10px;
+  cursor: pointer;
+  z-index: 99;
+}
+.tile.buff {
+  background-color: #3d393a !important;
+}
+.tile.buff:after {
+  content: 'B';
+}
+.tile.buff.row-5 {
+  color: #e4e4e4;
+  background-color: #235a90 !important;
+}
+.tile.dog {
+  background-color: #F9690E !important;
+}
+.tile.dog:after {
+  content: 'D';
+}
+.tile.player {
+  background-color: #C91F37 !important;
+}
+.tile.player:after {
+  content: 'P';
+}
+.grid .row-1, .grid .row-5 { background-color: #3d8cda !important; }
+.row-1 { top: 10px; }
+.row-2 { top: 80px; }
+.row-3 { top: 150px; }
+.row-4 { top: 220px; }
+.row-5 { top: 290px; }
+.col-1 { left: 10px; }
+.col-2 { left: 80px; }
+.col-3 { left: 150px; }
+.col-4 { left: 220px; }
+.col-5 { left: 290px; }
+.col-6 { left: 360px; }
+.col-7 { left: 430px; }
+.cemetery {
+  margin-top: 0.5rem;
+  padding: 8px 10px;
+  border-radius: 5px;
+  background-color: rgba(0,0,0,.05);
+  transition: height .2s ease-out;
+}
+.cemetery .tile {
+  display: inline-block;
+  position: relative;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 21px;
+  margin-right: 5px;
+  color: #9c9c9c;
+  background-color: #615c5e !important;
+  top: inherit !important;
+  left: inherit !important;
+}
+
+@media (min-width: 431px) and (max-width: 540px) {
+  .container {
+    max-width: 430px;
+  }
+  .game, .grid, .markers, .guide {
+    width: 430px;
+    height: 310px;
+  }
+  .tile {
+    width: 50px;
+    height: 50px;
+    font-size: 42px;
+    line-height: 50px;
+  }
+  .row-1 { top: 10px; }
+  .row-2 { top: 70px; }
+  .row-3 { top: 130px; }
+  .row-4 { top: 190px; }
+  .row-5 { top: 250px; }
+  .col-1 { left: 10px; }
+  .col-2 { left: 70px; }
+  .col-3 { left: 130px; }
+  .col-4 { left: 190px; }
+  .col-5 { left: 250px; }
+  .col-6 { left: 310px; }
+  .col-7 { left: 370px; }
+}
+
+@media (max-width: 430px) {
+  .container {
+    max-width: 320px;
+  }
+  .game, .grid, .markers, .guide {
+    width: 320px;
+    height: 230px;
+  }
+  .grid, .markers, .guide {
+    border-radius: 5px;
+  }
+  .tile {
+    width: 40px;
+    height: 40px;
+    font-size: 32px;
+    line-height: 42px;
+  }
+  .row-1 { top: 5px; }
+  .row-2 { top: 50px; }
+  .row-3 { top: 95px; }
+  .row-4 { top: 140px; }
+  .row-5 { top: 185px; }
+  .col-1 { left: 5px; }
+  .col-2 { left: 50px; }
+  .col-3 { left: 95px; }
+  .col-4 { left: 140px; }
+  .col-5 { left: 185px; }
+  .col-6 { left: 230px; }
+  .col-7 { left: 275px; }
+}
