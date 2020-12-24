@@ -44,6 +44,12 @@ Tile.prototype.applyClasses = function () {
     this.element.setAttribute('class', classes.join(' '));
 };
 
+Tile.prototype.remove = function () {
+    if (this.element) {
+        this.element.parentNode.removeChild(this.element);
+    }
+}
+
 function Grid(container) {
     this.rows = 1;
     this.cols = 1;
@@ -122,7 +128,6 @@ HTMLActuator.prototype.addGuide = function (selection, dist) {
             var marker = this.markerGrid.getTile(r, c);
             
             if (marker) {
-                console.log(marker);
                 if (!isPlayer) break;
                 if (isPlayer && marker.value != 'buff') break;
             }
@@ -147,7 +152,6 @@ function Cemetery() {
 }
 
 Cemetery.prototype.addTile = function (tile) {
-    console.log(tile);
     this.tiles.push(tile);
     this.container.appendChild(tile.element.cloneNode(true));
 };
@@ -233,7 +237,7 @@ GameManager.prototype.addStartTiles = function () {
                         if (tile) {
                             self.cemetery.addTile(tile);
                             buffaloes.splice(buffaloes.indexOf(tile), 1);
-                            tile.element.remove();
+                            tile.remove();
                         }
                     }
 
