@@ -197,11 +197,32 @@ GameManager.prototype.gameover = function (isWon) {
     window.alert('You ' + (isWon ? 'Win!' : 'Lose!'));
 };
 
+GameManager.prototype.selectNextBuffalo = function (player, buffaloes) {
+    // Sometimes, it selects a random buffalo (probability: 10%)
+    if (Math.random() <= 0.1) {
+        console.log('this!');
+        return buffaloes[Math.floor(Math.random() * buffaloes.length)];
+    }
+    
+    // Or with my heuristic function
+    function calcWeight(p, b) {
+        return 10 * b.row + Math.abs(p.col - b.col);
+    };
+
+    var result = buffaloes[0];
+    for (var i = 1; i < buffaloes.length; ++i) {
+        if (calcWeight(player, result) < calcWeight(player, buffaloes[i])) {
+            result = buffaloes[i];
+        }
+    }
+    return result;
+};
+
 GameManager.prototype.addStartTiles = function () {
     var self = this;
 
     var initPosBuffaloes = [];
-    for (var i=1; i <= this.cols; ++i) initPosBuffaloes.push([1, i]);
+    for (var i = 1; i <= this.cols; ++i) initPosBuffaloes.push([1, i]);
     var middle = Math.ceil(this.cols / 2);
     var initPosDogs = [[this.rows - 1, middle - 1], [this.rows - 1, middle + 1]];
     var initPosPlayer = [[this.rows - 1, middle]];
@@ -252,7 +273,7 @@ GameManager.prototype.addStartTiles = function () {
                             bs.push(buffaloes[i]);
                         }
                         if (bs.length) {
-                            var b = bs[Math.floor(Math.random() * bs.length)].getPosition();
+                            var b = self.selectNextBuffalo(oldPosition, bs).getPosition();
                             self.actuator.markerGrid.moveTile(b, {row: b.row + 1, col: b.col});
                             if (b.row + 1 == self.rows) {
                                 self.gameover(false);
