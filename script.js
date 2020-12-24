@@ -199,8 +199,8 @@ GameManager.prototype.gameover = function (isWon) {
 };
 
 GameManager.prototype.selectNextBuffalo = function (player, buffaloes) {
-    // Sometimes, it selects a random buffalo (probability: 5%)
-    if (Math.random() < 0.05) {
+    // Sometimes, it selects a random buffalo (probability: 1%)
+    if (Math.random() < 0.01) {
         return buffaloes[Math.floor(Math.random() * buffaloes.length)];
     }
     
