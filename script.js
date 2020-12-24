@@ -45,12 +45,17 @@ Tile.prototype.applyClasses = function () {
 };
 
 function Grid(container) {
-    this.rows = 7;
-    this.cols = 7;
+    this.rows = 1;
+    this.cols = 1;
     this.tiles = {};
 
     this.container = container;
 }
+
+Grid.prototype.setSize = function (rows, cols) {
+    if (rows !== undefined) this.rows = rows;
+    if (cols !== undefined) this.cols = cols;
+};
 
 Grid.prototype.addTile = function (tile) {
     this.tiles[tile.row + '-' + tile.col] = tile;
@@ -75,11 +80,25 @@ Grid.prototype.clear = function () {
     }
 };
 
+Grid.prototype.isInRange = function (row, col) {
+    return 1 <= row && row <= this.rows && 1 <= col && col <= this.cols;
+};
+
+Grid.prototype.isInRangeMovable = function (row, col) {
+    return 2 <= row && row <= (this.rows - 1) && 1 <= col && col <= this.cols;
+};
+
 function HTMLActuator() {
     this.markerGrid = new Grid(document.querySelector('.markers'));
     this.guideGrid  = new Grid(document.querySelector('.guide'));
     this.backGrid   = new Grid(document.querySelector('.grid'));
 }
+
+HTMLActuator.prototype.setup = function (rows, cols) {
+    this.markerGrid.setSize(rows, cols);
+    this.guideGrid.setSize(rows, cols);
+    this.backGrid.setSize(rows, cols);
+};
 
 HTMLActuator.prototype.addTile = function (grid, tile) {
     grid.container.appendChild(tile.element);
@@ -93,20 +112,17 @@ HTMLActuator.prototype.removeAllGuides = function () {
 HTMLActuator.prototype.addGuide = function (selection, dist) {
     dist = dist || 30;
     
-    function isMovableRange(r, c) {
-        return 2 <= r && r <= 6 && 1 <= c && c <= 7;
-    }
-    
     var dy = [-1, -1, -1, 0, 0, 1, 1, 1];
     var dx = [-1, 0, 1, -1, 1, -1, 0, 1];
     var tiles = [];
     var isPlayer = selection.value == 'player';
     for (var d = 0; d < 8; ++d){
         let r = selection.row + dy[d], c = selection.col + dx[d];
-        for (var t = 0; isMovableRange(r, c) && t < dist; t++){
+        for (let t = 0; this.backGrid.isInRangeMovable(r, c) && t < dist; t++){
             var marker = this.markerGrid.getTile(r, c);
             
             if (marker) {
+                console.log(marker);
                 if (!isPlayer) break;
                 if (isPlayer && marker.value != 'buff') break;
             }
@@ -124,18 +140,38 @@ HTMLActuator.prototype.addGuide = function (selection, dist) {
     return tiles;
 };
 
+function Cemetery() {
+    this.tiles = [];
+
+    this.container = document.querySelector('.cemetery');
+}
+
+Cemetery.prototype.addTile = function (tile) {
+    console.log(tile);
+    this.tiles.push(tile);
+    this.container.appendChild(tile.element.cloneNode(true));
+};
+
+Cemetery.prototype.clear = function () {
+    this.tiles = [];
+    while (this.container.firstChild) {
+        this.container.removeChild(this.container.firstChild);
+    }
+};
+
 function GameManager() {
-    this.rows = 7;
+    this.rows = 5;
     this.cols = 7;
+    this.isGameover = false;
 
     this.actuator = new HTMLActuator;
-    this.isGameover = false;
+    this.cemetery = new Cemetery;
 
     this.setup();
 }
 
 GameManager.prototype.setup = function () {
-    var self = this;
+    this.actuator.setup(this.rows, this.cols);
 
     for (var r = 1; r <= this.rows; ++r) {
         for (var c = 1; c <= this.cols; ++c) {
@@ -144,8 +180,9 @@ GameManager.prototype.setup = function () {
     }
 
     this.addStartTiles();
-
+    
     // release guides
+    var self = this;
     this.actuator.backGrid.container.addEventListener('click', function(evt) {
         self.actuator.removeAllGuides();
     });
@@ -161,7 +198,7 @@ GameManager.prototype.addStartTiles = function () {
 
     var initPosBuffaloes = [];
     for (var i=1; i <= this.cols; ++i) initPosBuffaloes.push([1, i]);
-    var middle = Math.ceil(this.rows / 2);
+    var middle = Math.ceil(this.cols / 2);
     var initPosDogs = [[this.rows - 1, middle - 1], [this.rows - 1, middle + 1]];
     var initPosPlayer = [[this.rows - 1, middle]];
     var buffaloes = [];
@@ -194,6 +231,7 @@ GameManager.prototype.addStartTiles = function () {
                     if (isPlayer) {
                         var tile = self.actuator.markerGrid.getTile(newPosition.row, newPosition.col);
                         if (tile) {
+                            self.cemetery.addTile(tile);
                             buffaloes.splice(buffaloes.indexOf(tile), 1);
                             tile.element.remove();
                         }
