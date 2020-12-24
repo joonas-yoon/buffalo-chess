@@ -118,6 +118,10 @@ p {
 .tile.buff:after {
   content: 'B';
 }
+.tile.buff.row-5 {
+  color: #e4e4e4;
+  background-color: #235a90 !important;
+}
 .tile.dog {
   background-color: #F9690E !important;
 }
@@ -158,6 +162,8 @@ p {
   line-height: 30px;
   font-size: 21px;
   margin-right: 5px;
+  color: #9c9c9c;
+  background-color: #615c5e !important;
   top: inherit !important;
   left: inherit !important;
 }
