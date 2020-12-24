@@ -172,7 +172,7 @@ body.gameover.win .grid .tile {
   margin-left: -10px;
   border-radius: 10px;
   cursor: pointer;
-  z-index: 99;
+  z-index: 9;
 }
 .tile.buff {
   background-color: #3d393a !important;
@@ -274,6 +274,11 @@ body.gameover.win .grid .tile {
     height: 40px;
     font-size: 32px;
     line-height: 42px;
+  }
+  .tile.dog:hover, .tile.player:hover {
+    border-width: 5px;
+    margin-top: -5px;
+    margin-left: -5px;
   }
   .row-1 { top: 5px; }
   .row-2 { top: 50px; }
