@@ -1,25 +1,53 @@
 @import url('https://fonts.googleapis.com/css2?family=Langar&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap');
+* {
+  box-sizing: border-box;
+}
 body {
   background-color: #ffe0a5;
+  margin: 0;
+  padding: 0;
+}
+p {
+  font-family: 'Roboto Slab', serif;
+  font-weight: 200;
+  font-size: medium;
 }
 .container {
   width: 100%;
-  max-width: 920px;
+  max-width: 500px;
   margin: 0 auto;
-  padding: 1rem 2rem;
+  padding: 0;
+}
+.header {
+  margin-top: 2rem;
+  padding: 0;
+  text-align: center;
+}
+.header h1 {
+  font-family: 'Langar', cursive;
+  letter-spacing: 4pt;
+  margin-bottom: 0rem;
+}
+.divider {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: rgba(0,0,0,.1);
 }
 .game {
-  width: 500px;
+  position: relative;
   margin: 0 auto;
 }
 .game.wild .grid .tile {
   background-color: #f5d394;
   border-color: #ffe0a5;
 }
-.grid, .markers, .guide {
+.game, .grid, .markers, .guide {
   width: 500px;
   height: 360px;
+}
+.grid, .markers, .guide {
   position: absolute;
   border-radius: 10px;
 }
@@ -74,6 +102,7 @@ body {
   line-height: 60px;
   text-align: center;
   transition: background-color .2s ease-out, top .4s cubic-bezier(0.22, 0.61, 0.36, 1), left .4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  box-sizing: content-box !important;
 }
 .tile.dog:hover, .tile.player:hover {
   border: 10px solid rgba(0,0,0,.1);
@@ -101,20 +130,12 @@ body {
 .tile.player:after {
   content: 'P';
 }
-.grid .row-1.col-1 { border-top-left-radius: 5px; }
-.grid .row-1.col-5 { border-top-right-radius: 5px; }
-.grid .row-5.col-1 { border-bottom-left-radius: 5px; }
-.grid .row-5.col-5 { border-bottom-right-radius: 5px; }
 .grid .row-1, .grid .row-5 { background-color: #3d8cda !important; }
-.grid .row-1 { border-top: 0; } .grid .row-7 { border-bottom: 0; }
-.grid .col-1 { border-left: 0; } .grid .col-7 { border-right: 0; }
 .row-1 { top: 10px; }
 .row-2 { top: 80px; }
 .row-3 { top: 150px; }
 .row-4 { top: 220px; }
 .row-5 { top: 290px; }
-.row-6 { top: 360px; }
-.row-7 { top: 430px; }
 .col-1 { left: 10px; }
 .col-2 { left: 80px; }
 .col-3 { left: 150px; }
@@ -122,8 +143,21 @@ body {
 .col-5 { left: 290px; }
 .col-6 { left: 360px; }
 .col-7 { left: 430px; }
-.header {
-  font-family: 'Langar', cursive;
-  letter-spacing: 4pt;
-  margin-bottom: 0rem;
+.cemetery {
+  margin-top: 0.5rem;
+  padding: 8px 10px;
+  border-radius: 5px;
+  background-color: rgba(0,0,0,.05);
+  transition: height .2s ease-out;
+}
+.cemetery .tile {
+  display: inline-block;
+  position: relative;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 21px;
+  margin-right: 5px;
+  top: inherit !important;
+  left: inherit !important;
 }
