@@ -39,10 +39,6 @@ p {
   position: relative;
   margin: 0 auto;
 }
-.game.wild .grid .tile {
-  background-color: #f5d394;
-  border-color: #ffe0a5;
-}
 .game, .grid, .markers, .guide {
   width: 500px;
   height: 360px;
@@ -92,9 +88,10 @@ p {
 .tile {
   position: absolute;
   border: 0;
+  border-color: #ffe0a5;
   border-radius: 5px;
   color: rgba(255,255,255,.5);
-  background-color: #fff;
+  background-color: #f5d394;
   width: 60px;
   height: 60px;
   font-size: 48px;
