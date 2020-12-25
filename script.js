@@ -189,7 +189,7 @@ History.parseEvent = function (str) {
         ret['c1'] = Number(evt[2]);
         ret['r2'] = Number(evt[3]);
         ret['c2'] = Number(evt[4]);
-        ret['kill'] = evt[5] === 'true';
+        ret['kill'] = evt[5] === '1';
     }
     else if (evt[0] == 'e') {
         ret['type'] = 'end';
@@ -225,13 +225,34 @@ History.prototype.stringify = function () {
         if (type == 'e') {
             data.push(log.value);
         } else if (type == 'm') {
-            data.push(log.r1, log.c1, log.r2, log.c2, log.kill);
-        } else if (type == 'k') {
-            data.push(log.r, log.c);
+            data.push(log.r1, log.c1, log.r2, log.c2, log.kill ? 1 : 0);
         }
         result.push(data.join('-'));
     }
     return result.join(',');
+};
+
+History.prototype.load = function (str) {
+    str = str || '';
+    var events = str.split(',');
+    for (var i = 0; i < events.length; ++i) {
+        let evt = History.parseEvent(events[i]);
+        if (evt.type == 'end') {
+            this.log.push({
+                type: 'e',
+                value: evt.result === 'win'
+            });
+        } else if (evt.type == 'move') {
+            this.log.push({
+                type: 'm',
+                r1: evt.r1,
+                c1: evt.c1,
+                r2: evt.r2,
+                c2: evt.c2,
+                isKilled: evt.kill ? 1 : 0,
+            });
+        }
+    }
 };
 
 function GameManager() {
@@ -312,7 +333,10 @@ GameManager.prototype.addEventListeners = function () {
 
     // share replay button
     this.actuator.shareButton.addEventListener('click', function(evt){
-        copyToClipboard(window.location.href + '?l=' + self.history.stringify());
+        var url = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname;
+        url += '?l=' + self.history.stringify();
+        copyToClipboard(url);
+        window.alert('Copy link to clipboard!');
     });
 };
 
@@ -469,6 +493,8 @@ GameManager.prototype.replay = function (logStr) {
         if (History.parseEvent(events[i]).type == 'invalid') return;
     }
 
+    document.body.setAttribute('class', 'spectate');
+
     var self = this;
 
     function end(evt, delay) {
@@ -506,4 +532,10 @@ GameManager.prototype.replay = function (logStr) {
 
 window.addEventListener('load', function(){
     var gm = new GameManager;
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('l')) {
+        var log = urlParams.get('l');
+        gm.replay(log);
+        gm.history.load(log);
+    }
 });

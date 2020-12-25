@@ -11,6 +11,17 @@
     opacity: 1;
   }
 }
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 body {
   background-color: #ffe0a5;
   margin: 0;
@@ -112,6 +123,35 @@ body.gameover.win .grid .tile {
 }
 .result .button:hover {
   background-color: #5f533b;
+}
+body.spectate .replay {
+  display: block;
+}
+.box.replay {
+  display: none;
+  background-color: rgba(255, 224, 165, 0.33);
+  z-index: 5;
+  -webkit-animation: fade-in 500ms ease-in-out;
+  -moz-animation: fade-in 500ms ease-in-out;
+  animation: fade-in 500ms ease-in-out;
+  -webkit-animation-fill-mode: both;
+  -moz-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+.box.replay p {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  margin: 10px;
+  font-size: 10pt;
+  font-family: 'Roboto Slab', sans-serif;
+  color: white;
+  -webkit-animation: blink 2000ms ease infinite;
+  -moz-animation: blink 2000ms ease infinite;
+  animation: blink 2000ms ease infinite;
+  -webkit-animation-fill-mode: both;
+  -moz-animation-fill-mode: both;
+  animation-fill-mode: both;
 }
 .markers .tile {
   z-index: 2;
