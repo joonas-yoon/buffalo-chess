@@ -96,7 +96,9 @@ Grid.prototype.isInRangeMovable = function (row, col) {
 
 function HTMLActuator() {
     this.gameContainer = document.querySelector('.game');
-    this.restartButton = this.gameContainer.querySelector('.result .button');
+    this.restartButton = this.gameContainer.querySelector('.result .restart-button');
+    this.replayButton = this.gameContainer.querySelector('.result .replay-button');
+    this.shareButton = this.gameContainer.querySelector('.result .share-button');
 
     this.markerGrid = new Grid(this.gameContainer.querySelector('.markers'));
     this.guideGrid  = new Grid(this.gameContainer.querySelector('.guide'));
@@ -172,6 +174,66 @@ Cemetery.prototype.clear = function () {
     }
 };
 
+function History() {
+    this.log = [];
+}
+
+// parse to {type: string, args...}
+History.parseEvent = function (str) {
+    var evt = str.split('-');
+    var ret = {};
+
+    if (evt[0] == 'm') {
+        ret['type'] = 'move';
+        ret['r1'] = Number(evt[1]);
+        ret['c1'] = Number(evt[2]);
+        ret['r2'] = Number(evt[3]);
+        ret['c2'] = Number(evt[4]);
+        ret['kill'] = evt[5] === 'true';
+    }
+    else if (evt[0] == 'e') {
+        ret['type'] = 'end';
+        ret['result'] = evt[1] == 'w' ? 'win' : 'lose';
+    }
+    else {
+        ret['type'] = 'invalid';
+    }
+
+    return ret;
+};
+
+History.prototype.clear = function () {
+    while (this.log.length) {
+        this.log.pop();
+    }
+};
+
+History.prototype.addMove = function (pos1, pos2, isKilled) {
+    this.log.push({type: 'm', r1: pos1.row, c1: pos1.col, r2: pos2.row, c2: pos2.col, kill: isKilled});
+};
+
+History.prototype.addResult = function (isWon) {
+    this.log.push({type: 'e', value: isWon ? 'w' : 'l'});
+};
+
+History.prototype.stringify = function () {
+    var result = [];
+    for (var i = 0; i < this.log.length; ++i) {
+        let log = this.log[i];
+        let type = log.type;
+        let data = [type];
+        if (type == 'e') {
+            data.push(log.value);
+        } else if (type == 'm') {
+            data.push(log.r1, log.c1, log.r2, log.c2, log.kill);
+        } else if (type == 'k') {
+            data.push(log.r, log.c);
+        }
+        result.push(data.join('-'));
+    }
+    return result.join(',');
+};
+
 function GameManager() {
     this.rows = 5;
     this.cols = 7;
@@ -179,11 +241,13 @@ function GameManager() {
 
     this.actuator = new HTMLActuator;
     this.cemetery = new Cemetery;
+    this.history  = new History;
 
     this.player = undefined;
     this.dogs = [];
 
     this.setup();
+    this.addEventListeners();
 }
 
 GameManager.prototype.init = function () {
@@ -215,16 +279,40 @@ GameManager.prototype.setup = function () {
     }
 
     this.addStartTiles();
+};
+
+GameManager.prototype.addEventListeners = function () {
+    var self = this;
     
     // release guides
-    var self = this;
     this.actuator.backGrid.container.addEventListener('click', function(evt) {
         self.actuator.removeAllGuides();
     });
 
+    // restart button
     this.actuator.restartButton.addEventListener('click', function(evt){
-        self.init();
+        self.history.clear();
         self.setup();
+    });
+    
+    // replay button
+    this.actuator.replayButton.addEventListener('click', function(evt){
+        self.setup();
+        self.replay(self.history.stringify());
+    });
+        
+    function copyToClipboard(val) {
+        var t = document.createElement("textarea");
+        document.body.appendChild(t);
+        t.value = val;
+        t.select();
+        document.execCommand('copy');
+        document.body.removeChild(t);
+    }
+
+    // share replay button
+    this.actuator.shareButton.addEventListener('click', function(evt){
+        copyToClipboard(window.location.href + '?l=' + self.history.stringify());
     });
 };
 
@@ -235,6 +323,8 @@ GameManager.prototype.gameover = function (isWon) {
     var resultContainer = document.querySelector('.game .result');
     var msg = resultContainer.querySelector('.message');
     msg.innerHTML = 'You ' + (isWon ? 'Win!' : 'Lose&mldr;');
+
+    this.history.addResult(isWon);
 };
 
 GameManager.prototype.selectNextBuffalo = function (buffaloes) {
@@ -316,16 +406,19 @@ GameManager.prototype.addStartTiles = function () {
                     self.actuator.removeAllGuides();
 
                     // if player, buffalo can be killed
+                    let isKilled = false;
                     if (isPlayer) {
                         var tile = self.actuator.markerGrid.getTile(newPosition.row, newPosition.col);
                         if (tile) {
                             self.cemetery.addTile(tile);
                             buffaloes.splice(buffaloes.indexOf(tile), 1);
                             tile.remove();
+                            isKilled = true;
                         }
                     }
 
                     self.actuator.markerGrid.moveTile(oldPosition, newPosition);
+                    self.history.addMove(oldPosition, newPosition, isKilled);
 
                     // buffalo moves
                     setTimeout(function(){
@@ -337,8 +430,10 @@ GameManager.prototype.addStartTiles = function () {
                         }
                         if (bs.length) {
                             var b = self.selectNextBuffalo(bs).getPosition();
-                            self.actuator.markerGrid.moveTile(b, {row: b.row + 1, col: b.col});
-                            if (b.row + 1 == self.rows) {
+                            var b2 = {row: b.row + 1, col: b.col};
+                            self.actuator.markerGrid.moveTile(b, b2);
+                            self.history.addMove(b, b2);
+                            if (b2.row == self.rows) {
                                 self.gameover(false);
                             }
                         } else {
@@ -364,6 +459,49 @@ GameManager.prototype.addStartTiles = function () {
     // player
     this.actuator.addTile(this.actuator.markerGrid, this.player);
     this.player.addEvent('click', listener);
+};
+
+GameManager.prototype.replay = function (logStr) {
+    logStr = logStr || '';
+    var events = logStr.split(',');
+    if (!events.length) return;
+    for (var i = 0; i < events.length; ++i) {
+        if (History.parseEvent(events[i]).type == 'invalid') return;
+    }
+
+    var self = this;
+
+    function end(evt, delay) {
+        setTimeout(function(){
+            self.gameover(evt.result == 'win');
+        }, delay);
+    }
+
+    function move(evt, delay) {
+        let grid = self.actuator.markerGrid;
+        let cemetery = self.cemetery;
+        setTimeout(function(){
+            if (evt.kill) {
+                let tile = grid.getTile(evt.r2, evt.c2);
+                cemetery.addTile(tile);
+                tile.remove();
+            }
+            grid.moveTile(
+                {row: evt.r1, col: evt.c1},
+                {row: evt.r2, col: evt.c2}
+            );
+        }, delay);
+    }
+
+    events.forEach(function(event, i) {
+        let evt = History.parseEvent(event);
+        if (evt.type == 'end') {
+            end(evt, 1000 + i * 1000);
+        }
+        else if (evt.type == 'move') {
+            move(evt, 1000 + i * 1000);
+        }
+    });
 };
 
 window.addEventListener('load', function(){

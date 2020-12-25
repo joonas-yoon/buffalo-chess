@@ -93,14 +93,14 @@ body.gameover.win .grid .tile {
   animation-fill-mode: both;
 }
 .result .message {
-  margin: 1rem auto;
+  margin: 0 auto;
   font-size: 3rem;
   font-family: 'Langar', cursive;
   letter-spacing: 3px;
 }
 .result .button {
   padding: 10px 15px;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   background-color: #7d6f52;
   color: white;
   border-radius: 3px;
