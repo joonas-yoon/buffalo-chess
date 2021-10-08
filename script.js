@@ -128,7 +128,7 @@ HTMLActuator.prototype.removeAllGuides = function () {
 
 HTMLActuator.prototype.addGuide = function (selection, dist) {
     dist = dist || 30;
-    
+
     var dy = [-1, -1, -1, 0, 0, 1, 1, 1];
     var dx = [-1, 0, 1, -1, 1, -1, 0, 1];
     var tiles = [];
@@ -137,7 +137,7 @@ HTMLActuator.prototype.addGuide = function (selection, dist) {
         let r = selection.row + dy[d], c = selection.col + dx[d];
         for (let t = 0; this.backGrid.isInRangeMovable(r, c) && t < dist; t++){
             var marker = this.markerGrid.getTile(r, c);
-            
+
             if (marker) {
                 if (!isPlayer) break;
                 if (isPlayer && marker.value != 'buff') break;
@@ -178,28 +178,46 @@ function History() {
     this.log = [];
 }
 
-// parse to {type: string, args...}
-History.parseEvent = function (str) {
-    var evt = str.split('-');
-    var ret = {};
+History.encode = function (events) {
+    var pad = function(str, size) {
+        return new Array(size).concat([str]).join('0').slice(-size);
+    };
+    var rcs = [], ks = [];
+    let end = 'i';
+    for (var evt of events) {
+        if (evt.type === 'e') {
+            end = evt.value;
+        } else if (evt.type === 'm') {
+            rcs.push(pad(
+                ((evt.r1-1) * (5*7*7) +
+                (evt.r2-1) * (7*7) +
+                (evt.c1-1) * 7 +
+                (evt.c2-1)).toString(36), 2));
+            ks.push(1 + Number(!!evt.kill));
+        } else {
+            return "invalid";
+        }
+    }
+    return [rcs.join(''), parseInt(ks.join(''), 3).toString(36), end].join('-');
+};
 
-    if (evt[0] == 'm') {
-        ret['type'] = 'move';
-        ret['r1'] = Number(evt[1]);
-        ret['c1'] = Number(evt[2]);
-        ret['r2'] = Number(evt[3]);
-        ret['c2'] = Number(evt[4]);
-        ret['kill'] = evt[5] === '1';
-    }
-    else if (evt[0] == 'e') {
-        ret['type'] = 'end';
-        ret['result'] = evt[1] == 'w' ? 'win' : 'lose';
-    }
-    else {
-        ret['type'] = 'invalid';
-    }
+History.decode = function (str) {
+    if (str == "invalid") return [{type: 'i'}];
 
-    return ret;
+    var [rcs, ks, end] = str.split('-');
+    var karr = [...parseInt(ks, 36).toString(3)].map(i => i === '2')
+    var result = rcs.match(/.{1,2}/g).map((rc, i) => {
+        var v = parseInt(rc, 36);
+        return {
+            type: 'm',
+            r1: Math.floor(1 + v / 245),
+            r2: Math.floor(1 + (v % 245) / 49),
+            c1: Math.floor(1 + (v % 49) / 7),
+            c2: Math.floor(1 + v % 7),
+            kill: karr[i],
+        }
+    }).concat([ { type: 'e', value: end } ]);
+    return result;
 };
 
 History.prototype.clear = function () {
@@ -212,44 +230,31 @@ History.prototype.addMove = function (pos1, pos2, isKilled) {
     this.log.push({type: 'm', r1: pos1.row, c1: pos1.col, r2: pos2.row, c2: pos2.col, kill: isKilled});
 };
 
-History.prototype.addResult = function (isWon) {
-    this.log.push({type: 'e', value: isWon ? 'w' : 'l'});
-};
-
-History.prototype.stringify = function () {
-    var result = [];
-    for (var i = 0; i < this.log.length; ++i) {
-        let log = this.log[i];
-        let type = log.type;
-        let data = [type];
-        if (type == 'e') {
-            data.push(log.value);
-        } else if (type == 'm') {
-            data.push(log.r1, log.c1, log.r2, log.c2, log.kill ? 1 : 0);
-        }
-        result.push(data.join('-'));
-    }
-    return result.join(',');
+History.prototype.setResult = function (isWon) {
+    var result = {type: 'e', value: isWon ? 'w' : 'l'};
+    var log = this.log;
+    if (!log) log = [result];
+    else if (log[log.length - 1].type !== 'e') log.push(result);
+    else log[log.length - 1] = result;
 };
 
 History.prototype.load = function (str) {
-    str = str || '';
-    var events = str.split(',');
+    var events = History.decode(str);
     for (var i = 0; i < events.length; ++i) {
-        let evt = History.parseEvent(events[i]);
-        if (evt.type == 'end') {
+        let evt = events[i];
+        if (evt.type == 'e') {
             this.log.push({
                 type: 'e',
-                value: evt.result === 'win'
+                value: evt.result
             });
-        } else if (evt.type == 'move') {
+        } else if (evt.type == 'm') {
             this.log.push({
                 type: 'm',
                 r1: evt.r1,
                 c1: evt.c1,
                 r2: evt.r2,
                 c2: evt.c2,
-                isKilled: evt.kill ? 1 : 0,
+                isKilled: Number(!!evt.kill),
             });
         }
     }
@@ -282,7 +287,7 @@ GameManager.prototype.init = function () {
         this.dogs.pop();
     }
     this.dogs = [];
-    
+
     this.cemetery.clear();
 
     this.actuator.clear();
@@ -304,7 +309,7 @@ GameManager.prototype.setup = function () {
 
 GameManager.prototype.addEventListeners = function () {
     var self = this;
-    
+
     // release guides
     this.actuator.backGrid.container.addEventListener('click', function(evt) {
         self.actuator.removeAllGuides();
@@ -315,13 +320,13 @@ GameManager.prototype.addEventListeners = function () {
         self.history.clear();
         self.setup();
     });
-    
+
     // replay button
     this.actuator.replayButton.addEventListener('click', function(evt){
         self.setup();
-        self.replay(self.history.stringify());
+        self.replay(History.encode(self.history.log));
     });
-        
+
     function copyToClipboard(val) {
         var t = document.createElement("textarea");
         document.body.appendChild(t);
@@ -333,8 +338,8 @@ GameManager.prototype.addEventListeners = function () {
 
     // share replay button
     this.actuator.shareButton.addEventListener('click', function(evt){
-        var url = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname;
-        url += '?l=' + self.history.stringify();
+        var url = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        url += '?l=' + History.encode(self.history.log);
         copyToClipboard(url);
         window.alert('Copy link to clipboard!');
     });
@@ -348,7 +353,7 @@ GameManager.prototype.gameover = function (isWon) {
     var msg = resultContainer.querySelector('.message');
     msg.innerHTML = 'You ' + (isWon ? 'Win!' : 'Lose&mldr;');
 
-    this.history.addResult(isWon);
+    this.history.setResult(isWon);
 };
 
 GameManager.prototype.selectNextBuffalo = function (buffaloes) {
@@ -365,7 +370,7 @@ GameManager.prototype.selectNextBuffalo = function (buffaloes) {
         }
         return 0;
     }
-    
+
     // Or with my heuristic function
     function calcWeight(p, b) {
         // it can go in
@@ -420,7 +425,7 @@ GameManager.prototype.addStartTiles = function () {
             var selection = evt.target.ref;
             var isPlayer = selection.value === 'player';
             var guides = self.actuator.addGuide(selection, isPlayer ? 1 : undefined);
-            
+
             var guideListener = {
                 handleEvent: function (evt) {
                     // selection moves
@@ -471,7 +476,7 @@ GameManager.prototype.addStartTiles = function () {
             });
         }
     };
-    
+
     // dogs
     initPosDogs.forEach(function(pos, i) {
         var tile = new Tile({ row: pos[0], col: pos[1] }, 'dog');
@@ -486,12 +491,8 @@ GameManager.prototype.addStartTiles = function () {
 };
 
 GameManager.prototype.replay = function (logStr) {
-    logStr = logStr || '';
-    var events = logStr.split(',');
+    var events = History.decode(logStr);
     if (!events.length) return;
-    for (var i = 0; i < events.length; ++i) {
-        if (History.parseEvent(events[i]).type == 'invalid') return;
-    }
 
     document.body.setAttribute('class', 'spectate');
 
@@ -499,7 +500,7 @@ GameManager.prototype.replay = function (logStr) {
 
     function end(evt, delay) {
         setTimeout(function(){
-            self.gameover(evt.result == 'win');
+            self.gameover(evt.result == 'w');
         }, delay);
     }
 
@@ -519,12 +520,11 @@ GameManager.prototype.replay = function (logStr) {
         }, delay);
     }
 
-    events.forEach(function(event, i) {
-        let evt = History.parseEvent(event);
-        if (evt.type == 'end') {
-            end(evt, 1000 + i * 1000);
+    events.forEach(function(evt, i) {
+        if (evt.type == 'e') {
+            end(evt, 1000 + (i - 1) * 1000 + 300);
         }
-        else if (evt.type == 'move') {
+        else if (evt.type == 'm') {
             move(evt, 1000 + i * 1000);
         }
     });
